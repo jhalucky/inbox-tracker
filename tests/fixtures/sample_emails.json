@@ -1,0 +1,81 @@
+[
+  {
+    "from": "Ada Lead <ada@newco.example>",
+    "subject": "Pricing for a 10-seat plan?",
+    "body": "Hi, we are evaluating your product for our team. Can you send pricing for 10 seats and a start date next month?\n\nSECRET_BODY_MARKER_LEAD",
+    "headers": {},
+    "label": true
+  },
+  {
+    "from": "Bob <bob@example.com>",
+    "subject": "Thanks for the intro",
+    "body": "Thanks so much for connecting us last week. No need to reply.\n\nSECRET_BODY_MARKER_THANKS",
+    "headers": {},
+    "label": false
+  },
+  {
+    "from": "Weekly Digest <digest@news.example>",
+    "subject": "Your weekly newsletter",
+    "body": "Top stories this week. SECRET_BODY_MARKER_NEWSLETTER",
+    "headers": {
+      "List-Unsubscribe": "<mailto:unsub@news.example>",
+      "Precedence": "bulk"
+    },
+    "label": false
+  },
+  {
+    "from": "GitHub <noreply@github.com>",
+    "subject": "[repo] A new comment on your pull request",
+    "body": "A comment was added. SECRET_BODY_MARKER_NOREPLY",
+    "headers": {
+      "Auto-Submitted": "auto-generated"
+    },
+    "label": false
+  },
+  {
+    "from": "Calendar <calendar@example.com>",
+    "subject": "Invitation: Product demo",
+    "body": "BEGIN:VCALENDAR\nMETHOD:REQUEST\nBEGIN:VEVENT\nSUMMARY:Product demo\nEND:VEVENT\nEND:VCALENDAR\nSECRET_BODY_MARKER_CALENDAR",
+    "headers": {
+      "Content-Type": "text/calendar; method=REQUEST"
+    },
+    "label": false
+  },
+  {
+    "from": "Mailer-Daemon <mailer-daemon@googlemail.com>",
+    "subject": "Delivery Status Notification (Failure)",
+    "body": "The following message could not be delivered. SECRET_BODY_MARKER_DAEMON",
+    "headers": {},
+    "label": false
+  },
+  {
+    "from": "Ivy Investor <ivy@fund.example>",
+    "subject": "Term sheet — decision by Friday",
+    "body": "We would like to move forward. Please confirm you can sign the term sheet by Friday, otherwise we will pause.\n\nSECRET_BODY_MARKER_INVESTOR",
+    "headers": {},
+    "label": true
+  },
+  {
+    "from": "Chen Client <chen@client.example>",
+    "subject": "Can we reschedule Thursday's call?",
+    "body": "Something came up. Could we move Thursday to next week? SECRET_BODY_MARKER_CLIENT",
+    "headers": {},
+    "label": true
+  },
+  {
+    "from": "Promo <deals@shop.example>",
+    "subject": "50% off everything",
+    "body": "Shop now. SECRET_BODY_MARKER_PROMO",
+    "headers": {
+      "Precedence": "junk"
+    },
+    "label": false
+  },
+  {
+    "from": "Sam Hiring <sam@acme.example>",
+    "subject": "Re: Founding engineer role",
+    "body": "Are you still open to a conversation this week?\n\nOn Tue, Mar 4, 2025 at 4:02 PM You wrote:\n> Thanks, I will think about it.\n> SECRET_BODY_MARKER_QUOTE\n",
+    "headers": {},
+    "label": true
+  }
+]
