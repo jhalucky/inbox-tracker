@@ -17,12 +17,20 @@ def get_llm_provider(settings: Settings | None = None) -> LLMProvider:
             "(for example gpt-4o-mini, llama3.1, or claude-haiku-4-5)."
         )
     if s.llm_provider == "anthropic":
-        return AnthropicProvider(api_key=s.llm_key, model=model)
+        return AnthropicProvider(
+            api_key=s.llm_key,
+            model=model,
+            timeout=s.llm_timeout_s,
+            max_tokens=s.llm_max_tokens,
+        )
     if s.llm_provider == "openai_compatible":
         return OpenAICompatibleProvider(
             api_key=s.llm_key,
             model=model,
             base_url=s.llm_base_url,
             json_mode=s.llm_json_mode,
+            disable_thinking=s.llm_disable_thinking,
+            timeout=s.llm_timeout_s,
+            max_tokens=s.llm_max_tokens,
         )
     raise LLMConfigError(f"Unknown LLM_PROVIDER: {s.llm_provider}")

@@ -20,9 +20,11 @@ class AnthropicProvider:
         model: str,
         client: anthropic.Anthropic | None = None,
         timeout: float = 30.0,
+        max_tokens: int = 300,
         backoff_seconds: float = 1.0,
     ) -> None:
         self._model = model
+        self._max_tokens = max_tokens
         self._backoff_seconds = backoff_seconds
         self._client = client or anthropic.Anthropic(api_key=api_key or "missing", timeout=timeout)
 
@@ -37,7 +39,7 @@ class AnthropicProvider:
             try:
                 return self._client.messages.create(
                     model=self._model,
-                    max_tokens=300,
+                    max_tokens=self._max_tokens,
                     system=SYSTEM_PROMPT,
                     messages=[
                         {

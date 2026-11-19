@@ -5,6 +5,7 @@ from app.providers.parsing import (
     classify_with_json_retry,
     parse_classification,
     strip_code_fences,
+    strip_think_blocks,
 )
 
 VALID = """
@@ -30,6 +31,37 @@ def test_parse_fenced_json() -> None:
     assert parsed.needs_reply is True
     assert parsed.urgency == 4
     assert parsed.category == "lead"
+
+
+def test_strip_closed_think_block() -> None:
+    raw = f"<think>internal chain of thought, ignore me</think>\n{VALID}"
+    assert "chain of thought" not in strip_think_blocks(raw)
+    parsed = parse_classification(raw)
+    assert parsed is not None
+    assert parsed.needs_reply is True
+    assert parsed.category == "lead"
+
+
+def test_strip_unclosed_think_block_at_start() -> None:
+    raw = f"<think>\nstill thinking, never closed\n{VALID}"
+    parsed = parse_classification(raw)
+    assert parsed is not None
+    assert parsed.urgency == 4
+    assert "still thinking" not in strip_think_blocks(raw)
+
+
+def test_strip_think_block_plus_code_fences() -> None:
+    raw = f"<think>plan the JSON</think>\n```json{VALID}```"
+    parsed = parse_classification(raw)
+    assert parsed is not None
+    assert parsed.summary == "Lead wants 10-seat pricing."
+
+
+def test_parse_without_think_block() -> None:
+    parsed = parse_classification(VALID)
+    assert parsed is not None
+    assert parsed.needs_reply is True
+    assert "<think>" not in VALID
 
 
 def test_parse_invalid_returns_none() -> None:

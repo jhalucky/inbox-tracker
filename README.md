@@ -55,7 +55,8 @@ python -m app.pipeline.classifier emails.json --limit 20
 ## Pointing the LLM at a provider
 
 Set `LLM_PROVIDER`, `LLM_KEY`, `LLM_MODEL`, and (for OpenAI-compatible APIs)
-`LLM_BASE_URL`. Optional: `LLM_JSON_MODE`, `LLM_PRICE_INPUT_PER_M`,
+`LLM_BASE_URL`. Optional: `LLM_JSON_MODE`, `LLM_DISABLE_THINKING`,
+`LLM_MAX_TOKENS`, `LLM_TIMEOUT_S`, `LLM_PRICE_INPUT_PER_M`,
 `LLM_PRICE_OUTPUT_PER_M`.
 
 | Service    | `LLM_PROVIDER`       | `LLM_BASE_URL`                                              | Notes |
@@ -108,6 +109,32 @@ LLM_MODEL=claude-haiku-4-5
 ```
 
 Set `LLM_JSON_MODE=false` if the provider rejects `response_format={"type":"json_object"}`.
+
+## Using a local model (Ollama / LM Studio / llama.cpp)
+
+Any server that speaks the OpenAI chat completions API works. Example for Qwen3
+on Ollama (thinking models need extra time and `/no_think`):
+
+```bash
+LLM_PROVIDER=openai_compatible
+LLM_BASE_URL=http://localhost:11434/v1
+LLM_KEY=ollama
+LLM_MODEL=qwen3:8b
+LLM_DISABLE_THINKING=true
+LLM_JSON_MODE=false
+LLM_MAX_TOKENS=300
+LLM_TIMEOUT_S=120
+```
+
+LM Studio is typically `http://localhost:1234/v1`. llama.cpp's OpenAI-compatible
+server is typically `http://localhost:8080/v1`. `LLM_KEY` can be any string.
+
+Troubleshooting:
+
+- **Timeouts** — local reasoning models are slow. Raise `LLM_TIMEOUT_S` (120–180 is common for Qwen3 8B).
+- **Empty or non-JSON output** — set `LLM_JSON_MODE=false` (many local servers reject `response_format`). The parser still extracts a JSON object from the reply.
+- **Truncated context** — email bodies are already capped at 2,000 characters. If the JSON itself is cut off, raise `LLM_MAX_TOKENS`.
+- **Thinking text in output** — Qwen3 may wrap reasoning in `<think>...</think>` (or leave `<think>` unclosed). `LLM_DISABLE_THINKING=true` appends `/no_think` to the user message; the parser also strips think blocks before JSON extraction.
 
 ## Tests and lint
 

@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 CompleteFn = Callable[[], tuple[str, TokenUsage]]
 
 _FENCE_RE = re.compile(r"^```(?:json)?\s*|\s*```$", re.IGNORECASE)
+_THINK_BLOCK_RE = re.compile(r"<think>.*?</think>", re.IGNORECASE | re.DOTALL)
+_THINK_OPEN_RE = re.compile(r"^<think>", re.IGNORECASE)
 
 
 def strip_code_fences(text: str) -> str:
@@ -23,7 +25,17 @@ def strip_code_fences(text: str) -> str:
     return text
 
 
+def strip_think_blocks(text: str) -> str:
+    text = _THINK_BLOCK_RE.sub("", text)
+    stripped = text.lstrip()
+    if _THINK_OPEN_RE.match(stripped):
+        brace = stripped.find("{")
+        text = stripped[brace:] if brace != -1 else ""
+    return text.strip()
+
+
 def extract_json_object(text: str) -> str:
+    text = strip_think_blocks(text)
     text = strip_code_fences(text)
     start = text.find("{")
     end = text.rfind("}")

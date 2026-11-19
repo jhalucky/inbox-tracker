@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     llm_model: str | None = None
     llm_base_url: str = "https://api.openai.com/v1"
     llm_json_mode: bool = True
+    llm_disable_thinking: bool = False
+    llm_max_tokens: int = 300
+    llm_timeout_s: float = 30
     llm_price_input_per_m: float | None = None
     llm_price_output_per_m: float | None = None
 

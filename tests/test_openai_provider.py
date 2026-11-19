@@ -26,14 +26,24 @@ def _ok_body(content: str = VALID_CONTENT) -> dict:
     }
 
 
-def _provider(handler, *, json_mode: bool = True) -> OpenAICompatibleProvider:
+def _provider(
+    handler,
+    *,
+    json_mode: bool = True,
+    disable_thinking: bool = False,
+    timeout: float = 30.0,
+    max_tokens: int = 300,
+) -> OpenAICompatibleProvider:
     transport = httpx.MockTransport(handler)
-    client = httpx.Client(transport=transport, timeout=30.0)
+    client = httpx.Client(transport=transport, timeout=timeout)
     return OpenAICompatibleProvider(
         api_key="test-key",
         model="gpt-test",
         base_url="https://api.groq.com/openai/v1",
         json_mode=json_mode,
+        disable_thinking=disable_thinking,
+        timeout=timeout,
+        max_tokens=max_tokens,
         client=client,
         backoff_seconds=0,
     )
@@ -61,9 +71,48 @@ def test_request_shape_and_usage() -> None:
     assert body["messages"][0]["role"] == "system"
     assert body["messages"][1]["role"] == "user"
     assert "Please confirm." in body["messages"][1]["content"]
+    assert "/no_think" not in body["messages"][1]["content"]
     assert result.needs_reply is True
     assert result.prompt_tokens == 11
     assert result.completion_tokens == 7
+
+
+def test_no_think_appended_only_when_enabled() -> None:
+    captured: dict = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["body"] = json.loads(request.content)
+        return httpx.Response(200, json=_ok_body())
+
+    email = EmailInput(sender="a@b.com", subject="Hi", body="Hello")
+    _provider(handler, disable_thinking=True).classify(email)
+    user_content = captured["body"]["messages"][1]["content"]
+    assert user_content.endswith("/no_think")
+
+    captured.clear()
+    _provider(handler, disable_thinking=False).classify(email)
+    user_content = captured["body"]["messages"][1]["content"]
+    assert "/no_think" not in user_content
+
+
+def test_max_tokens_and_timeout_passed_through() -> None:
+    captured: dict = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["body"] = json.loads(request.content)
+        captured["timeout"] = request.extensions.get("timeout")
+        return httpx.Response(200, json=_ok_body())
+
+    email = EmailInput(sender="a@b.com", subject="Hi", body="Hello")
+    _provider(handler, max_tokens=512, timeout=120.0).classify(email)
+    assert captured["body"]["max_tokens"] == 512
+    timeout = captured["timeout"]
+    assert timeout is not None
+    if isinstance(timeout, dict):
+        read_timeout = timeout.get("read")
+    else:
+        read_timeout = getattr(timeout, "read", None)
+    assert read_timeout == 120.0
 
 
 def test_json_mode_false_omits_response_format() -> None:
